@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Twoje podróże</h2>
+    {% for trip in trips %}
+        <div class="card">{{ trip.destination }} ({{ trip.start_date }} - {{ trip.end_date }})</div>
+    {% empty %}
+        <p>Brak podróży. <a href="{% url 'create_trip' %}">Dodaj nową podróż</a></p>
+    {% endfor %}
+
+    <h2>Przypomnienia</h2>
+    {% for reminder in reminders %}
+        <div class="card">{{ reminder.task }} ({{ reminder.due_date|default:"brak daty" }})</div>
+    {% empty %}
+        <p>Brak przypomnień.</p>
+    {% endfor %}
+
+    <h2>Alerty i wiadomości</h2>
+    {% for alert in alerts %}
+        <div class="card">{{ alert.message }} ({{ alert.date }})</div>
+    {% empty %}
+        <p>Brak alertów.</p>
+    {% endfor %}
+{% endblock %}
