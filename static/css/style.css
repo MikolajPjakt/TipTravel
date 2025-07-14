@@ -1,0 +1,208 @@
+:root {
+    --primary-color: #6750A4;
+    --primary-light: #E8DEF8;
+    --secondary-color: #625B71;
+    --background-color: #FFFFFF;
+    --surface-color: #FFFBFE;
+    --error-color: #B3261E;
+    --success-color: #146C2E;
+    --text-primary: #1C1B1F;
+    --text-secondary: #49454F;
+    --border-radius: 16px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* Navbar styling */
+.navbar {
+    background-color: var(--surface-color) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    color: var(--primary-color) !important;
+    font-weight: 700;
+    font-size: 24px;
+}
+
+/* Card styling */
+.card {
+    border-radius: var(--border-radius);
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: var(--spacing-lg);
+}
+
+.card-header {
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--primary-light);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+}
+
+.card-body {
+    padding: var(--spacing-lg);
+}
+
+/* Button styling */
+.btn {
+    border-radius: 100px;
+    padding: 10px 24px;
+    font-weight: 500;
+    text-transform: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Form styling */
+.form-control {
+    border-radius: var(--border-radius);
+    padding: 12px var(--spacing-md);
+    border: 1px solid var(--text-secondary);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.form-label {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+/* Custom components */
+.trip-card {
+    border-radius: var(--border-radius);
+    background: var(--surface-color);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.trip-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.reminder-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    background: var(--surface-color);
+    margin-bottom: var(--spacing-sm);
+}
+
+.reminder-item i {
+    color: var(--primary-color);
+    margin-right: var(--spacing-md);
+}
+
+/* Mobile specific styles */
+@media (max-width: 768px) {
+    .container {
+        padding: var(--spacing-md);
+    }
+    
+    .card {
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .navbar-brand {
+        font-size: 20px;
+    }
+}
+
+/* Login/Register page specific styles */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+    background-color: var(--surface-color);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius);
+    background: var(--background-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.auth-logo {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto var(--spacing-xl);
+    display: block;
+}
+
+.auth-title {
+    text-align: center;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xl);
+    font-weight: 700;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xl);
+    font-size: 14px;
+}
+
+/* Alert styling */
+.alert {
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    border: none;
+}
+
+.alert-danger {
+    background-color: #FFDAD6;
+    color: var(--error-color);
+}
+
+.alert-success {
+    background-color: #DCF7E3;
+    color: var(--success-color);
+} 

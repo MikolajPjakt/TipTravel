@@ -1,24 +1,546 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}TipTravel{% endblock %}
 
 {% block content %}
-    <h2>Twoje podróże</h2>
-    {% for trip in trips %}
-        <div class="card">{{ trip.destination }} ({{ trip.start_date }} - {{ trip.end_date }})</div>
-    {% empty %}
-        <p>Brak podróży. <a href="{% url 'create_trip' %}">Dodaj nową podróż</a></p>
-    {% endfor %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h2 class="app-name">TipTravel</h2>
+            <h1>{% trans "Twoje podróże" %}</h1>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'add_trip' %}" class="add-trip-button">
+                <i class="fas fa-plus"></i>
+                {% trans "Dodaj podróż" %}
+            </a>
+        </div>
+    </div>
 
-    <h2>Przypomnienia</h2>
-    {% for reminder in reminders %}
-        <div class="card">{{ reminder.task }} ({{ reminder.due_date|default:"brak daty" }})</div>
-    {% empty %}
-        <p>Brak przypomnień.</p>
-    {% endfor %}
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-    <h2>Alerty i wiadomości</h2>
-    {% for alert in alerts %}
-        <div class="card">{{ alert.message }} ({{ alert.date }})</div>
-    {% empty %}
-        <p>Brak alertów.</p>
-    {% endfor %}
+    <div class="trips-grid">
+        {% for trip in active_trips %}
+        <div class="trip-card">
+            <div class="trip-card-header">
+                <span class="trip-purpose">{{ trip.get_purpose_display }}</span>
+                <div class="trip-dates">
+                    <i class="fas fa-calendar"></i>
+                    <span>{{ trip.start_date|date:"d.m.Y" }} - {{ trip.end_date|date:"d.m.Y" }}</span>
+                </div>
+            </div>
+            <h2 class="trip-destination">{{ trip.destination }}</h2>
+            <div class="trip-stats">
+                <div class="stat">
+                    <i class="fas fa-box"></i>
+                    <span>{{ trip.items.count }} {% trans "przedmiotów" %}</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-tasks"></i>
+                    <span>{{ trip.reminders.count }} {% trans "zadań" %}</span>
+                </div>
+            </div>
+            <div class="trip-actions">
+                <a href="{% url 'trip_details' trip.id %}" class="details-button">
+                    <i class="fas fa-eye"></i>
+                    {% trans "Zobacz szczegóły" %}
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-suitcase"></i>
+            <p>{% trans "Nie masz jeszcze żadnych zaplanowanych podróży" %}</p>
+            <a href="{% url 'add_trip' %}" class="add-trip-button">
+                <i class="fas fa-plus"></i>
+                {% trans "Dodaj pierwszą podróż" %}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="dashboard-sections">
+        <div class="dashboard-section tasks-section">
+            <h2>{% trans "Zadania do wykonania" %}</h2>
+            {% if tasks %}
+            <div class="tasks-list">
+                {% for task in tasks %}
+                <div class="task-item">
+                    <div class="task-checkbox">
+                        <input type="checkbox" id="task-{{ task.id }}">
+                        <label for="task-{{ task.id }}"></label>
+                    </div>
+                    <div class="task-content">
+                        <h3>{{ task.title }}</h3>
+                        <span class="task-trip">{{ task.trip.destination }}</span>
+                        {% if task.due_date %}
+                        <span class="task-due-date">
+                            <i class="fas fa-clock"></i>
+                            {{ task.due_date|date:"d.m.Y" }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-tasks"></i>
+                <p>{% trans "Brak zadań do wykonania" %}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="dashboard-section alerts-section">
+            <h2>{% trans "Alerty" %}</h2>
+            {% if alerts %}
+            <div class="alerts-list">
+                {% for alert in alerts %}
+                <div class="alert-item priority-{{ alert.priority }}">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <h3>{{ alert.title }}</h3>
+                        <span class="alert-trip">{{ alert.trip.destination }}</span>
+                        <p>{{ alert.message }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-bell"></i>
+                <p>{% trans "Brak aktywnych alertów" %}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<nav class="bottom-nav">
+    <a href="{% url 'dashboard' %}" class="nav-item active">
+        <i class="fa-solid fa-house"></i>
+        <span>Główna</span>
+    </a>
+    <a href="{% url 'add_trip' %}" class="nav-item">
+        <i class="fa-solid fa-plus"></i>
+        <span>Dodaj</span>
+    </a>
+    <a href="#" class="nav-item">
+        <i class="fa-solid fa-suitcase"></i>
+        <span>Podróże</span>
+    </a>
+    <a href="#" class="nav-item">
+        <i class="fa-solid fa-user"></i>
+        <span>Profil</span>
+    </a>
+</nav>
+
+<style>
+.dashboard-container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 24px;
+    padding-bottom: 100px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.app-name {
+    font-size: 34px;
+    font-weight: 700;
+    color: #6750A4;
+    margin: 0;
+    margin-bottom: 20px;
+}
+
+.dashboard-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1C1B1F;
+    margin: 0;
+}
+
+.add-trip-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background-color: #6750A4;
+    color: white;
+    border-radius: 100px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.add-trip-button:hover {
+    background-color: #7B65B6;
+}
+
+.messages {
+    margin-bottom: 24px;
+}
+
+.message {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.message.success {
+    background-color: #E6F4EA;
+    color: #1B5E20;
+}
+
+.message.error {
+    background-color: #FFDAD6;
+    color: #B3261E;
+}
+
+.trips-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 350px;
+    /* zachowaj gap i margin-bottom */
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.trip-card {
+    background-color: #FFFBFE;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #E7E0EC;
+}
+
+.trip-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.trip-purpose {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: #E8DEF8;
+    color: #6750A4;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.trip-dates {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #49454F;
+    font-size: 14px;
+}
+
+.trip-destination {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1C1B1F;
+    margin: 0 0 16px 0;
+}
+
+.trip-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #49454F;
+    font-size: 14px;
+}
+
+.trip-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.details-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #E8DEF8;
+    color: #6750A4;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.details-button:hover {
+    background-color: #D8CEE8;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 48px 24px;
+    background-color: #FFFBFE;
+    border-radius: 16px;
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: #6750A4;
+    margin-bottom: 16px;
+}
+
+.empty-state p {
+    color: #49454F;
+    margin-bottom: 24px;
+}
+
+.dashboard-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.dashboard-section {
+    background-color: #FFFBFE;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #E7E0EC;
+}
+
+.dashboard-section h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1C1B1F;
+    margin: 0 0 16px 0;
+}
+
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background-color: #F7F2FA;
+    border-radius: 8px;
+}
+
+.task-checkbox {
+    position: relative;
+}
+
+.task-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.task-checkbox label {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #6750A4;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+}
+
+.task-checkbox input:checked + label::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #6750A4;
+}
+
+.task-content {
+    flex: 1;
+}
+
+.task-content h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1C1B1F;
+    margin: 0 0 4px 0;
+}
+
+.task-trip {
+    display: block;
+    font-size: 14px;
+    color: #49454F;
+    margin-bottom: 4px;
+}
+
+.task-due-date {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #49454F;
+    font-size: 12px;
+}
+
+.alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.alert-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.alert-item.priority-1 {
+    background-color: #E6F4EA;
+}
+
+.alert-item.priority-2 {
+    background-color: #FFF8E1;
+}
+
+.alert-item.priority-3 {
+    background-color: #FFDAD6;
+}
+
+.alert-icon {
+    color: #6750A4;
+    font-size: 20px;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-content h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1C1B1F;
+    margin: 0 0 4px 0;
+}
+
+.alert-trip {
+    display: block;
+    font-size: 14px;
+    color: #49454F;
+    margin-bottom: 4px;
+}
+
+.alert-content p {
+    font-size: 14px;
+    color: #49454F;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 16px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+        text-align: center;
+    }
+
+    .header-content {
+        align-items: center;
+    }
+
+    .add-trip-button {
+        justify-content: center;
+    }
+
+    .trips-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-sections {
+        grid-template-columns: 1fr;
+    }
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 16px 0;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 1000; 
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #49454F;
+    font-size: 11px;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.nav-item i {
+    font-size: 22px;
+}
+
+.nav-item.active {
+    color: #6750A4;
+}
+
+.nav-item:hover {
+    color: #7B65B6;
+}
+</style>
 {% endblock %}
